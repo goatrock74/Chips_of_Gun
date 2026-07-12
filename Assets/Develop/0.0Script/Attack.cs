@@ -1,32 +1,38 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Attack : MonoBehaviour
 {
+    [SerializeField] private GameObject attack_Light;
     private Animator ani;
-    private bool isshoot = false;
+    private bool isshoot;
 
     private void Awake()
     {
         ani = GetComponent<Animator>();
+        attack_Light.SetActive(false);
     }
 
     private void Update()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.leftButton.wasPressedThisFrame&&!isshoot)
         {
-            ShootAnimation();
+            StartCoroutine(ShootAnimation());
         }
     }
 
-    private void ShootAnimation()
+    private IEnumerator ShootAnimation()
     {
-        isshoot = true;
         ani.Play("Shoot");
-        if (isshoot && ani.GetCurrentAnimatorStateInfo(0).IsName("Shoot"))
-        {
-            ani.Play("Idle");
-        }
+        yield return null;
+        float animationLeght = ani.GetCurrentAnimatorStateInfo(0).length;
+        isshoot = true;
+        attack_Light.SetActive(true);
+        yield return new WaitForSecondsRealtime(animationLeght);
+        attack_Light.SetActive(false);
+        isshoot = false;
+        ani.Play("Idle");
     }
-
 }
